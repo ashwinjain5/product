@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Submit Products</title>
+  <meta charset="UTF-8" />
+</head>
+<body>
+  <h2>Add Products</h2>
+  <form id="product-form">
+    <input type="text" name="brand" placeholder="Brand" required /><br/>
+    <input type="text" name="category" placeholder="Category" required /><br/>
+    <input type="text" name="sub_category" placeholder="Sub-Category" required /><br/>
+    <input type="text" name="price" placeholder="Price" required /><br/>
+    <button type="button" onclick="addProduct()">Add Product</button>
+  </form>
+
+  <div id="product-list"></div>
+  <button onclick="submitAll()">Submit All</button>
+
+  <script>
+    const productList = [];
+    const endpoint = "https://script.google.com/macros/s/AKfycbxpOA_fdFAwGUWVUTwdipJ_b-4uhne4w7FgDfcu6XnFvtt-52ziSvtjpVwrmdc68GhJ/exec"; // replace with your deployed Web App URL
+
+    function addProduct() {
+      const form = document.getElementById('product-form');
+      const formData = new FormData(form);
+      const obj = {};
+      formData.forEach((value, key) => obj[key] = value);
+      productList.push(obj);
+
+      const listDiv = document.getElementById("product-list");
+      listDiv.innerHTML += `<p>${obj.brand} - ${obj.category} - ₹${obj.price}</p>`;
+      form.reset();
+    }
+
+    function submitAll() {
+      if (!productList.length) return alert("Add at least one product");
+
+      fetch(endpoint, {
+        method: "POST",
+        body: JSON.stringify({ records: productList }),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.status === 'success' ? `Submitted ${data.added} records!` : `Error: ${data.message}`);
+        productList.length = 0;
+        document.getElementById("product-list").innerHTML = '';
+      });
+    }
+  </script>
+</body>
+</html>
